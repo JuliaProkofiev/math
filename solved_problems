@@ -36,7 +36,7 @@ d) 4, 16, 36, 64, 100 (números pares elevados a ele mesmo)
 
 e) 1, 1, 2, 3, 5, 8, 13 (1+1=2, 1+2=3, 2+3=5, próximo número é a soma dos dois números anteriores)
 
-f) 2, 10, 12, 16, 17, 18, 19, ____ (
+f) 2, 10, 12, 16, 17, 18, 19, 20 (pela observação o padrão a guiar o próximo elemento é sequencial ao último).
 
 
 3) Dado um vetor que guarda o valor de faturamento diário de uma distribuidora de todos os dias de um ano, faça um programa, na linguagem que desejar, que calcule e retorne:
@@ -50,6 +50,40 @@ a) Considerar o vetor já carregado com as informações de valor de faturamento
 b) Podem existir dias sem faturamento, como nos finais de semana e feriados. Estes dias devem ser ignorados no cálculo da média.
 
 c) Utilize o algoritmo mais veloz que puder definir.
+
+# 3) Dado um vetor que guarda o valor de faturamento diário de uma distribuidora de todos os dias de um ano,
+# faça um programa, na linguagem que desejar, que calcule e retorne:
+
+# - O menor valor de faturamento ocorrido em um dia do ano;
+# - O maior valor de faturamento ocorrido em um dia do ano;
+# - Número de dias no ano em que o valor de faturamento diário foi superior à média anual.
+
+# a) Considerar o vetor já carregado com as informações de valor de faturamento.
+
+# b) Podem existir dias sem faturamento, como nos finais de semana e feriados. Estes dias devem ser ignorados
+# no cálculo da média.
+
+# c) Utilize o algoritmo mais veloz que puder definir.
+
+# Exemplo simples vetor de faturamento
+faturamento = [99.9, 200, 100, 350, 190, 0, 0, 500, 180, 0, 400, 0, 500, 0, 120, 800, 410, 0, 20, 0]  
+
+# Remove os dias sem faturamento
+faturamento_validos = [f for f in faturamento if f > 0]
+
+# O maior e menor valor de faturamento ocorrido em um dia do ano;
+menor_faturamento = min(faturamento_validos) # Menor número do vetor = menor faturamento
+maior_faturamento = max(faturamento_validos) # Maior número do vetor = maior faturamento
+
+# Calculo da média de faturamento
+media_anual = sum(faturamento_validos) / len(faturamento_validos)
+
+# Número de dias no ano em que o valor de faturamento diário foi superior à média anual
+dias_acima_da_media = sum(1 for f in faturamento_validos if f > media_anual)
+
+print(f"Menor faturamento: {menor_faturamento}")
+print(f"Maior faturamento: {maior_faturamento}")
+print(f"Dias acima da média: {dias_acima_da_media}")
 
 
 4) Banco de dados
@@ -66,10 +100,78 @@ Você ficou responsável pela parte da estrutura de banco de dados que será usa
 - Aponte os campos que são chave primária (PK) e chave estrangeira (FK);
 - Faça uma busca utilizando comando SQL que traga o código, a razão social e o(s) telefone(s) de todos os clientes do estado de São Paulo (código “SP”);
 
+CREATE DATABASE IF NOT EXISTS CadastroClientes;
+USE CadastroClientes;
+
+-- Tabela de Estados
+CREATE TABLE Estados (
+    idEstado INT PRIMARY KEY AUTO_INCREMENT,
+    nomeEstado VARCHAR(50) NOT NULL,
+    codigoEstado CHAR(2) NOT NULL
+);
+
+-- Tabela de Clientes
+CREATE TABLE Clientes (
+    idCliente INT PRIMARY KEY AUTO_INCREMENT,
+    nomeCliente VARCHAR(100) NOT NULL,
+    cnpj BIGINT NOT NULL,
+    idEstado INT,
+    FOREIGN KEY (idEstado) REFERENCES Estados(idEstado)
+);
+
+-- Tabela de Tipos de Telefone
+CREATE TABLE Tipos_Telefone (
+    idTipoTelefone INT PRIMARY KEY AUTO_INCREMENT,
+    descricao VARCHAR(50) NOT NULL
+);
+
+-- Tabela de Telefones
+CREATE TABLE Telefones (
+    idTelefone INT PRIMARY KEY AUTO_INCREMENT,
+    numero VARCHAR(15) NOT NULL,
+    idCliente INT,
+    idTipoTelefone INT,
+    FOREIGN KEY (idCliente) REFERENCES Clientes(idCliente),
+    FOREIGN KEY (idTipoTelefone) REFERENCES Tipos_Telefone(idTipoTelefone)
+);
+
+-- Inserir dados na tabela Estados
+INSERT INTO Estados (nomeEstado, codigoEstado) VALUES
+('São Paulo', 'SP'),
+('Rio de Janeiro', 'RJ'),
+('Ceará', 'CE');
+
+-- Inserir dados na tabela Tipos_Telefone
+INSERT INTO Tipos_Telefone (descricao) VALUES
+('Celular'),
+('Residencial'),
+('Comercial');
+
+-- Inserir dados na tabela Clientes
+INSERT INTO Clientes (nomeCliente, cnpj, idEstado) VALUES
+('Cliente A', 12345678910, 1), -- SP
+('Cliente B', 12345678911, 2), -- RJ
+('Cliente C', 12345678912, 1); -- SP
+
+-- Inserir dados na tabela Telefones
+INSERT INTO Telefones (numero, idCliente, idTipoTelefone) VALUES
+('11987654321', 1, 1), -- Cliente A, Celular
+('1133322211', 1, 2),  -- Cliente A, Residencial
+('21987654321', 2, 1), -- Cliente B, Celular
+('11987654322', 3, 1); -- Cliente C, Celular
+
+-- Consulta SQL
+SELECT c.idCliente, c.nomeCliente, t.numero
+FROM Clientes c
+JOIN Telefones t ON c.idCliente = t.idCliente
+JOIN Estados e ON c.idEstado = e.idEstado
+WHERE e.codigoEstado = 'SP';
 
 
 5) Dois veículos, um carro e um caminhão, saem respectivamente de cidades opostas pela mesma rodovia. O carro, de Ribeirão Preto em direção a Barretos, a uma velocidade constante de 90 km/h, e o caminhão, de Barretos em direção a Ribeirão Preto, a uma velocidade constante de 80 km/h. Quando eles se cruzarem no percurso, qual estará mais próximo da cidade de Ribeirão Preto?
 
 a) Considerar a distância de 125km entre a cidade de Ribeirão Preto <-> Barretos.
 b) Considerar 3 pedágios como obstáculo e que o carro leva 5 minutos a mais para passar em cada um deles, pois ele não possui dispositivo de cobrança de pedágio.
-c)Explique como chegou no resultado.
+c) Explique como chegou no resultado.
+
+Os veículos estaram se cruzando no mesmo ponto da rodovia. Mesmo considerando os destinos diferentes, ao se encontrarem no mesmo ponto, estarão na mesma distância tanto de Ribeirão Preto quanto de Barretos.
